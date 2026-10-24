@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Infinite Love</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #060208;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            background-color: #060208;
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 0 60px rgba(0,0,0,0.9);
+            border-radius: 12px;
+            touch-action: none;
+        }
+        @media (max-width: 820px) {
+            canvas {
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="infinityCanvas" width="800" height="800"></canvas>
+
+<script>
+    const canvas = document.getElementById('infinityCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const phrases = [
+        "Love", "Amor", "Amour", "Amore", "Liebe", "Liefde", "Kärlek", 
+        "Kærlighed", "Kjærlighet", "Rakkaus", "Ást", "Любовь", "Кохання", 
+        "Miłość", "Láska", "Αγάπη", "Aşk", "Sevgi", "حب", "אהבה", 
+        "प्यार", "प्रेम", "ভালোবাসা", "காதல்", "ప్రేమ", "സ്നേഹം", "愛", "사랑", "爱", 
+        "Tình yêu", "ความรัก", "Cinta", "Pag-ibig", "Upendo", "Ifẹ", 
+        "Uthando", "Aloha", "Aroha", "Amo", "Szerelem", "Iubire", 
+        "Dragoste", "Љубав", "Ljubav", "Grá", "Cariad", "Gaol", "Սեր", 
+        "عشق", "محبت", "माया", "Píyaár", "Mīlestība", "Meilė", "Maitasuna",
+        "Armastus", "Љубов", "Dashuri", "Imħabba", "სიყვარული", "Mahabbat",
+        "Мөхәббәт", "Хайр", "A chit", "Khwam hak", "Aadaraya", "Preethi",
+        "Fikir", "Jaceyl", "Fitiavana", "Ƙauna", "Ịhụnanya", "Rudo", 
+        "Urukundo", "Chikondi", "Alofa", "Loloma", "'Ofa", "Evîn", "Mina",
+        "Brtse dung", "Karantez", "Léift", "Kærleiki", "Asanninneq", 
+        "Milost", "Aman", "Amiras", "Amoretti", "Lanmou", "Tresna", 
+        "Kanyaah", "Munay", "Mborayhu", "Tlazohtlaliztli", "Karunā",
+        "Penda", "Obich", "Каханне", "Gugma", "Sayang", "Lerato", "Thando",
+        "Kukonda", "Irot", "Sinta", "Mutya", "Asih", "Anbu", "Bhakti", 
+        "Sneha", "Anuraga", "Olufẹ", "Nji", "Mudiwa", "Ishq", "Jaan", 
+        "Aashiqui", "Hubb", "Garaam", "Widad", "Hawa", "Shaghaf", "Hiyam",
+        "Taim", "Wala", "Sababa", "Najwa", "Shawq", "Yêu", "Thương", "Ái", 
+        "Tình", "Mến", "Quý", "Cưng", "Arohanui", "Mutima", "Kopano", "Matoa", 
+        "Ithuba", "Sut", "Kharji", "Bhalobasha", "Mohabbat", "Ulaya", 
+        "Gusto", "Irog", "Mahal", "Liyag", "Suyo", "Giliw", "Mabuhay", "Kaloob", 
+        "Biyaya", "Luningning", "Marikit", "Hiraya", "Dalisay", "Tapat", "Wagas", 
+        "Lagi", "Sintang", "Puso", "Buhay", "Lakas", "Ganda", "Sariwa", "Sigla", 
+        "Ligaya", "Tuwa", "Ngiti", "Tawa", "Halik", "Yakap", "Dama", "Tingin", 
+        "Kilig", "Lambing", "Suyuan", "Habang", "Bukas", "Ngayon", "Kailanman",
+        "Agapi", "Eros", "Philia", "Storge", "Pragma", "Philautia", "Ludus", 
+        "Mania", "Agape", "Anpu", "Kātal", "Nēcam", "Pācam", "Mōkam", 
+        "Iṭam", "Māyai", "Iccai", "Vēṭkai", "Avā", "Ācai", "Viruppam", "Kāmam", 
+        "Kāṭci", "Kāṭṭu", "Mei", "Arul", "Irrakkam", "Pari", "Karuṇai", "Daya", 
+        "Krupa", "Mettā", "Muditā", "Upekkhā", "Ahimsa", "Bhavana", "Kama", 
+        "Rati", "Priti", "Kalyana", "Maitri", "Anukampa", "Saranagati", "Vatsalya", 
+        "Madhurya", "Sakhya", "Dasya", "Shanta", "Rasa", "Prem", "Isq", 
+        "Pyar", "Muhabbat", "Dosti", "Yaari", "Aashik", "Mehboob", "Sanam", 
+        "Janam", "Jigar", "Dil", "Rooh", "Zindagi", "Khushi", "Sukoon", "Qarar", 
+        "Chain", "Umeed", "Tamanna", "Aarzoo", "Hasrat", "Justaju", "Talab", 
+        "Chaah", "Dard", "Gham", "Khwaab", "Nasha", "Maza", "Suroor", "Noor", 
+        "Roshni", "Chamak", "Sitara", "Chand", "Suraj", "Aasmaan", "Zameen", 
+        "Duniya", "Jahan", "Mehfil", "Tanhai", "Safar", "Manzil", "Raasta", 
+        "Humsafar", "Saathi", "Mitr", "Dost", "Bandhu", "Sakha", "Sakhī", 
+        "Priyatama", "Kantā", "Vallabha", "Dayitā", "Nātha", "Prāṇanātha", 
+        "Hṛdayeśa", "Jīvaneśa", "Mānasacora", "Cittacora", "Nandakumāra", 
+        "Śyāmasundara", "Kṛṣṇa", "Rādhā", "Gopī", "Vṛndāvana", "Yamunā", 
+        "Kadamba", "Muralī", "Veṇu", "Bāṅsurī"
+    ];
+
+    let phraseBag = [...phrases];
+    for (let i = phraseBag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [phraseBag[i], phraseBag[j]] = [phraseBag[j], phraseBag[i]];
+    }
+
+    const off = document.createElement('canvas');
+    off.width = W; off.height = H;
+    const offCtx = off.getContext('2d', { willReadFrequently: true });
+
+    function drawTeardrop(context, cx, cy, rx, ry, isLeft) {
+        context.beginPath();
+        for (let i = 0; i <= 120; i++) {
+            let t = (isLeft ? Math.PI : 0) + (isLeft ? Math.PI : Math.PI) * (i / 120);
+            let factor = Math.sin(t);
+            let x = cx + rx * factor;
+            let y = cy + ry * factor * Math.cos(t);
+            if (i === 0) context.moveTo(x, y);
+            else context.lineTo(x, y);
+        }
+        context.fill();
+    }
+
+    offCtx.fillStyle = "white";
+    drawTeardrop(offCtx, 430, 420, 390, 260, true);
+    drawTeardrop(offCtx, 370, 420, 390, 260, false);
+    
+    offCtx.globalCompositeOperation = "destination-out";
+    drawTeardrop(offCtx, 340, 420, 240, 130, true);
+    drawTeardrop(offCtx, 460, 420, 240, 130, false);
+
+    const imgData = offCtx.getImageData(0, 0, W, H).data;
+
+    function getTrackPos(x, y) {
+        if (x >= 400) {
+            let a = Math.atan2(y - 420, x - 565);
+            return (a + Math.PI) / (2 * Math.PI) * 0.5;
+        } else {
+            let a = Math.atan2(y - 420, x - 235);
+            if (a > 0) a -= 2 * Math.PI;
+            return 0.5 + Math.abs(a) / (2 * Math.PI) * 0.5;
+        }
+    }
+
+    function getColor(x, dx, isEdge) {
+        let palette = [];
+        if (dx > 180) {
+            palette = ["#B4BEFE", "#CBA6F7", "#89B4FA", "#A6ADC8"];
+        } else if (dx > 70) {
+            palette = ["#F5C2E7", "#EBA0AC", "#F38BA8", "#F8BD96"];
+        } else {
+            palette = ["#FAB387", "#F9E2AF", "#FDEBC8"];
+        }
+        
+        if (isEdge) {
+            palette.push("#94E2D5", "#A6E3A1");
+        }
+        
+        return palette[Math.floor(Math.random() * palette.length)];
+    }
+
+    const gap = 3;
+    const FONT_SIZE = 10;
+    ctx.font = `bold ${FONT_SIZE}px Arial`;
+
+    function getBestFit(remaining) {
+        if (phraseBag.length === 0) return null; 
+        for (let i = phraseBag.length - 1; i >= 0; i--) {
+            let width = ctx.measureText(phraseBag[i]).width;
+            if (width <= remaining) {
+                return { 
+                    text: phraseBag.splice(i, 1)[0], 
+                    width: width 
+                };
+            }
+        }
+        return null; 
+    }
+
+    const rawParticles = [];
+
+    for (let y = 140; y <= 720; y += 12) {
+        let spans = [];
+        let inSpan = false;
+        let startX = 0;
+        
+        for (let x = 0; x < W; x++) {
+            let alpha = imgData[(y * W + x) * 4 + 3];
+            if (alpha > 128) {
+                if (!inSpan) {
+                    inSpan = true;
+                    startX = x;
+                }
+            } else {
+                if (inSpan) {
+                    inSpan = false;
+                    spans.push({ lo: startX, hi: x });
+                }
+            }
+        }
+        if (inSpan) spans.push({ lo: startX, hi: W });
+
+        spans.forEach(span => {
+            let available = span.hi - span.lo;
+            if (available < 10) return;
+
+            let line = [];
+            let remaining = available;
+            
+            while (remaining > 10) {
+                let candidate = getBestFit(remaining);
+                if (!candidate) break;
+                line.push(candidate);
+                remaining -= (candidate.width + gap);
+            }
+
+            if (line.length === 0) return;
+
+            let used = line.reduce((sum, item) => sum + item.width, 0) + Math.max(0, line.length - 1) * gap;
+            let slack = Math.max(0, available - used);
+            let currentX = span.lo + slack / 2;
+
+            line.forEach((item, index) => {
+                let centerX = currentX + item.width / 2;
+                let dx = Math.abs(centerX - 400);
+                let isEdge = (index === 0 || index === line.length - 1);
+                
+                rawParticles.push({
+                    text: item.text,
+                    x: centerX,
+                    y: y,
+                    width: item.width,
+                    baseColor: getColor(centerX, dx, isEdge), 
+                    trackPos: getTrackPos(centerX, y),
+                    isEdge: isEdge
+                });
+                currentX += item.width + gap;
+            });
+        });
+    }
+
+    let outer = rawParticles.filter(p => p.isEdge);
+    let inner = rawParticles.filter(p => !p.isEdge);
+    
+    function getAngle(x, y) {
+        let a = Math.atan2(y - 420, x - 400);
+        if (a < 0) a += 2 * Math.PI;
+        return a;
+    }
+    
+    outer.sort((a, b) => getAngle(a.x, a.y) - getAngle(b.x, b.y));
+    inner.sort(() => Math.random() - 0.5);
+    
+    const order = outer.concat(inner);
+
+    order.forEach(p => {
+        p.frame = 0;
+        p.dx = (Math.random() - 0.5) * 16; 
+        p.active = false;
+        p.settled = false;
+    });
+
+    const ANIM_FRAMES = 38;
+    const LIFT = 32;
+    let spawnIdx = 0;
+    let rate = order.length / (10 * 60); 
+    let acc = 0;
+    
+    let isWaveActive = false;
+    let wavePhase = 0.0;
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = `bold ${FONT_SIZE}px Arial`;
+        
+        if (spawnIdx < order.length) {
+            acc += rate;
+            while (acc >= 1 && spawnIdx < order.length) {
+                order[spawnIdx].active = true;
+                spawnIdx++;
+                acc -= 1;
+            }
+        }
+
+        let allSettled = true;
+
+        for (let i = 0; i < order.length; i++) {
+            let p = order[i];
+            
+            if (!p.active) {
+                allSettled = false;
+                continue;
+            }
+
+            if (!p.settled) {
+                allSettled = false;
+                p.frame++;
+                
+                let u = Math.min(1.0, p.frame / ANIM_FRAMES);
+                let eased = 1 - Math.pow(1 - u, 3);
+                
+                let currentX = p.x + p.dx * (1 - eased);
+                let currentY = p.y - LIFT * (1 - eased);
+
+                let flash = 0;
+                if (u > 0.58) {
+                    flash = 0.55 * Math.sin(Math.PI * Math.min(1, (u - 0.58) / 0.42));
+                }
+                
+                ctx.globalAlpha = 1.0;
+                ctx.shadowBlur = flash * 20;
+                ctx.shadowColor = "white";
+                ctx.fillStyle = (flash > 0.1) ? "#ffffff" : p.baseColor;
+                
+                ctx.fillText(p.text, currentX, currentY);
+
+                if (u >= 1) p.settled = true;
+
+            } else if (isWaveActive) {
+                let dist = wavePhase - p.trackPos;
+                if (dist < -0.5) dist += 1.0;
+                else if (dist > 0.5) dist -= 1.0;
+                
+                let absDist = Math.abs(dist);
+                let intensity = 0;
+                if (absDist < 0.15) {
+                    intensity = 1.0 - (absDist / 0.15);
+                    intensity = Math.pow(intensity, 1.2);
+                }
+                
+                ctx.globalAlpha = 0.65 + (intensity * 0.35);
+                if (intensity > 0.1) {
+                    ctx.shadowBlur = intensity * 18;
+                    ctx.shadowColor = p.baseColor; 
+                    ctx.fillStyle = "#ffffff";
+                } else {
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = p.baseColor;
+                }
+                ctx.fillText(p.text, p.x, p.y);
+                
+            } else {
+                ctx.globalAlpha = 0.65;
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = p.baseColor;
+                ctx.fillText(p.text, p.x, p.y);
+            }
+        }
+
+        if (allSettled && spawnIdx >= order.length && !isWaveActive) {
+            isWaveActive = true;
+        }
+
+        if (isWaveActive) {
+            wavePhase = (wavePhase + 0.003) % 1.0;
+        }
+
+        requestAnimationFrame(draw);
+    }
+
+    draw();
+</script>
+</body>
+</html>
